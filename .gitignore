@@ -1,0 +1,6 @@
+node_modules/
+storybook-static/
+.DS_Store
+.claude/
+check_contrast.py
+check_orphaned.py
