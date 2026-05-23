@@ -49,7 +49,7 @@ export const AllRegisters: Story = {
 
 function WaveAComposition() {
   const [toggle, setToggle] = useState(true);
-  const [checked, setChecked] = useState(true);
+  const [checked, setChecked] = useState<boolean | 'indeterminate'>(true);
   const [model, setModel] = useState('claude');
   return (
     <div>

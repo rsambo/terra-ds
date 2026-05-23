@@ -12,8 +12,8 @@ type Story = StoryObj<typeof Checkbox>;
 
 export const All: Story = {
   render: () => {
-    const [checked, setChecked] = useState(true);
-    const [unchecked, setUnchecked] = useState(false);
+    const [checked, setChecked] = useState<boolean | 'indeterminate'>(true);
+    const [unchecked, setUnchecked] = useState<boolean | 'indeterminate'>(false);
     const [indeterminate, setIndeterminate] = useState<'indeterminate' | boolean>('indeterminate');
     return (
       <div className="flex flex-col gap-md items-start">

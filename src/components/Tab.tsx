@@ -42,4 +42,4 @@ export const TabContent = React.forwardRef<
 ));
 TabContent.displayName = 'TabContent';
 
-export { TabsPrimitive as TabsRoot };
+export const TabsRoot = TabsPrimitive.Root;
