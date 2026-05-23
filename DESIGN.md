@@ -396,6 +396,46 @@ components:
     textColor: '{colors.focus-ring}'
     rounded: '{rounded.sm}'
     padding: '{spacing.2xs}'
+  textarea:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  textarea-focus:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  textarea-error:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.error}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  textarea-disabled:
+    backgroundColor: '{colors.neutral}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  select:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  select-open:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  select-disabled:
+    backgroundColor: '{colors.neutral}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.sm} {spacing.md}'
+  code-block:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.md}'
 ---
 
 ## Overview
