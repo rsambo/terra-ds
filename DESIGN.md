@@ -436,6 +436,51 @@ components:
     textColor: '{colors.on-surface}'
     rounded: '{rounded.md}'
     padding: '{spacing.md}'
+  sidebar:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.md}'
+  sidebar-section-label:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.xs} {spacing.md}'
+  header:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.sm} {spacing.lg}'
+  breadcrumb-item:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.sm}'
+    padding: '{spacing.xs} {spacing.sm}'
+  breadcrumb-item-active:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.sm}'
+    padding: '{spacing.xs} {spacing.sm}'
+  command-menu:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.lg}'
+    padding: '{spacing.sm}'
+  command-menu-item:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.sm}'
+    padding: '{spacing.sm} {spacing.md}'
+  command-menu-item-active:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.sm}'
+    padding: '{spacing.sm} {spacing.md}'
+  command-menu-section-label:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.xs} {spacing.md}'
 ---
 
 ## Overview

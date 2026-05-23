@@ -59,3 +59,18 @@ export type { CodeBlockProps } from './CodeBlock';
 
 export { Tooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';
+
+export { Breadcrumb } from './Breadcrumb';
+export type { BreadcrumbProps } from './Breadcrumb';
+
+export { Header } from './Header';
+export type { HeaderProps } from './Header';
+
+export { Sidebar, SidebarSection, SidebarItem } from './Sidebar';
+export type { SidebarProps, SidebarSectionProps, SidebarItemProps } from './Sidebar';
+
+export { AppShell } from './AppShell';
+export type { AppShellProps } from './AppShell';
+
+export { CommandMenu, CommandMenuSection, CommandMenuItem } from './CommandMenu';
+export type { CommandMenuProps, CommandMenuSectionProps, CommandMenuItemProps } from './CommandMenu';
