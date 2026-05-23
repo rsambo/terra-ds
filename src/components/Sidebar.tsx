@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { NavItem } from './NavItem';
 import { Tooltip } from './Tooltip';
 
 export interface SidebarProps {
@@ -61,22 +60,19 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   ...props
 }) => {
   return (
-    <div className={`flex items-center ${indent ? 'pl-xl' : ''}`}>
-      {icon && (
-        <span className={`mr-sm ${active ? 'text-on-accent' : 'text-on-surface-muted'}`}>
-          {icon}
-        </span>
-      )}
-      <NavItem
-        active={active}
-        onClick={onClick}
-        href={href}
-        className={`flex-1 ${className}`}
-        {...props}
-      >
-        {children}
-      </NavItem>
-    </div>
+    <a
+      href={href}
+      onClick={onClick}
+      className={`inline-flex items-center w-full font-label-lg rounded-sm px-md py-sm transition-colors focus:outline-none focus:ring-2 focus:ring-focus-ring ${
+        active
+          ? 'bg-accent text-on-accent'
+          : 'bg-surface text-on-surface-muted hover:bg-surface-raised hover:text-on-surface'
+      } ${indent ? 'pl-xl' : ''} ${className}`}
+      {...props}
+    >
+      {icon && <span className="mr-sm">{icon}</span>}
+      {children}
+    </a>
   );
 };
 

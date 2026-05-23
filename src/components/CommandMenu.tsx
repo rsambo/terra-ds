@@ -24,7 +24,7 @@ export const CommandMenuItem: React.FC<CommandMenuItemProps> = ({ onSelect, icon
   return (
     <div
       onClick={onSelect}
-      className="flex items-center gap-sm font-body-md text-on-surface rounded-sm px-md py-sm cursor-pointer outline-none transition-colors data-[highlighted]:bg-surface-raised"
+      className="flex items-center gap-sm font-body-md text-on-surface rounded-sm px-md py-sm cursor-pointer outline-none transition-colors hover:bg-surface-raised"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -78,9 +78,9 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ open, onOpenChange, pl
             className="w-full font-body-lg text-on-surface placeholder-on-surface-muted px-lg py-md outline-none border-b border-border-subtle bg-transparent"
           />
           <div className="max-h-80 overflow-y-auto py-sm">
-            {query ? (
+            {React.Children.count(children) === 0 ? (
               <div className="px-lg py-md font-body-md text-on-surface-muted">
-                No results for “{query}”
+                No results
               </div>
             ) : (
               children
