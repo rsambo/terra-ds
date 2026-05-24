@@ -79,7 +79,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 export const Sidebar: React.FC<SidebarProps> = ({ children, className = '', collapsed }) => {
   return (
     <aside
-      className={`bg-surface flex flex-col h-full border-r border-border-subtle overflow-y-auto ${collapsed ? 'w-14' : 'w-60'} ${className}`}
+      className={`bg-surface flex flex-col h-full border-r border-border-subtle overflow-y-auto transition-[width] duration-200 ease-in-out ${collapsed ? 'w-14' : 'w-60'} ${className}`}
     >
       <div className="flex flex-col gap-sm py-md">
         {React.Children.map(children, (child) => {

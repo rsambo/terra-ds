@@ -15,7 +15,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, side = 'top
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           side={side}
-          className="bg-primary text-on-primary rounded-md px-md py-sm font-label-sm shadow-raised z-50"
+          className="bg-primary text-on-primary rounded-md px-md py-sm font-label-sm shadow-raised z-50 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 duration-100"
           sideOffset={4}
         >
           {content}
