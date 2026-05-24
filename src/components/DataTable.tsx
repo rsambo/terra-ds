@@ -142,9 +142,9 @@ export function DataTable<T extends { id: string | number }>({
               return (
                 <DataTableRow
                   key={row.id}
-                  className={`bg-surface-raised text-on-surface hover:bg-surface-overlay ${
-                    isSelected ? 'bg-accent-container' : ''
-                  }`}
+                  className={`${
+                    isSelected ? 'bg-accent-container' : 'bg-surface-raised'
+                  } text-on-surface hover:bg-surface-overlay`}
                 >
                   {selectable && (
                     <DataTableCell className="w-12">
