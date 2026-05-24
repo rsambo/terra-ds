@@ -32,7 +32,7 @@ export const Toast: React.FC<ToastProps> = ({
       open={open}
       onOpenChange={onOpenChange}
       duration={duration}
-      className={`rounded-lg px-md py-sm shadow-overlay flex items-start gap-md data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-2 data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-full data-[state=closed]:fade-out-0 duration-200 ${variantClass}`}
+      className={`rounded-lg px-md py-sm shadow-overlay flex items-start gap-md data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-2 data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-full data-[state=closed]:fade-out-0 duration-200 motion-reduce:animate-none ${variantClass}`}
     >
       <div className="flex-1 min-w-0">
         <ToastPrimitive.Title className="font-label-lg">{title}</ToastPrimitive.Title>

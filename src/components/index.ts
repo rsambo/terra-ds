@@ -90,3 +90,6 @@ export type { EmptyStateProps } from './EmptyState';
 
 export { DataTable, DataTableHeader, DataTableRow, DataTableCell } from './DataTable';
 export type { DataTableProps, Column } from './DataTable';
+
+export { SkipLink } from './SkipLink';
+export type { SkipLinkProps } from './SkipLink';

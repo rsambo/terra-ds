@@ -7,7 +7,7 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ error, disabled, className = '', ...props }, ref) => {
     const base =
-      'w-full font-body-md text-on-surface placeholder-on-surface-muted focus:outline-none focus:ring-2 focus:ring-focus-ring resize-y';
+      'w-full font-body-md text-on-surface placeholder-on-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring resize-y';
 
     const state = disabled
       ? 'bg-neutral text-on-surface-muted rounded-md px-md py-sm'

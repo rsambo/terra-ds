@@ -97,6 +97,44 @@ import { Button, Input, Card, AppShell, Sidebar, Header } from 'terra-ds';
 
 All components, sub-components, and the `useToast` hook are available as named exports from the top-level `terra-ds` import.
 
+## 6. Accessibility setup
+
+### SkipLink
+
+Add a `SkipLink` as the first focusable element in your `AppShell` (or page wrapper) so keyboard users can bypass navigation:
+
+```tsx
+import { SkipLink, AppShell, Sidebar, Header } from 'terra-ds';
+
+function App() {
+  return (
+    <>
+      <SkipLink />
+      <AppShell
+        header={<Header title="My App" />}
+        sidebar={<Sidebar navLabel="Main navigation">...</Sidebar>}
+      >
+        ...
+      </AppShell>
+    </>
+  );
+}
+```
+
+`AppShell` renders the main content area with `id="main-content"`, which is the default target of `SkipLink`. If you use a custom layout, add `id="main-content"` to your primary content container.
+
+### Sidebar navigation label
+
+`Sidebar` renders as a `<nav>` element. Pass `navLabel` to set the accessible name:
+
+```tsx
+<Sidebar navLabel="Project navigation">...</Sidebar>
+```
+
+### Radix ARIA contract
+
+Terra DS builds on Radix primitives, which handle most ARIA attributes automatically (roles, states, focus management, and keyboard behavior). You generally do not need to add `role`, `aria-expanded`, or `aria-selected` manually — the primitives inject them. The exceptions are landmark components (`Header`, `Sidebar`, `AppShell`) and `SkipLink`, which use semantic HTML directly.
+
 ## Re-theming
 
 To change a token (e.g. the accent color), edit `DESIGN.md` in the Terra DS repo, run `./build-tokens.sh`, rebuild (`npm run build`), and re-link. Every component that uses the token will reflect the new value with no component edits.

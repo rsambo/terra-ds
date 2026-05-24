@@ -5,6 +5,7 @@ export interface SidebarProps {
   children: React.ReactNode;
   className?: string;
   collapsed?: boolean;
+  navLabel?: string;
 }
 
 export interface SidebarSectionProps {
@@ -34,6 +35,7 @@ export const SidebarSection: React.FC<SidebarSectionProps> = ({
       {label && (
         <button
           onClick={() => collapsible && setOpen(!open)}
+          aria-expanded={collapsible ? open : undefined}
           className={`flex items-center justify-between font-label-sm text-on-surface-muted uppercase tracking-wide px-md py-xs ${collapsible ? 'cursor-pointer hover:text-on-surface' : ''}`}
         >
           <span>{label}</span>
@@ -63,7 +65,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     <a
       href={href}
       onClick={onClick}
-      className={`inline-flex items-center w-full font-label-lg rounded-sm px-md py-sm transition-colors focus:outline-none focus:ring-2 focus:ring-focus-ring ${
+      className={`inline-flex items-center w-full font-label-lg rounded-sm px-md py-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
         active
           ? 'bg-accent text-on-accent'
           : 'bg-surface text-on-surface-muted hover:bg-surface-raised hover:text-on-surface'
@@ -76,10 +78,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({ children, className = '', collapsed }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ children, className = '', collapsed, navLabel = 'Main navigation' }) => {
   return (
-    <aside
-      className={`bg-surface flex flex-col h-full border-r border-border-subtle overflow-y-auto transition-[width] duration-200 ease-in-out ${collapsed ? 'w-14' : 'w-60'} ${className}`}
+    <nav
+      aria-label={navLabel}
+      className={`bg-surface flex flex-col h-full border-r border-border-subtle overflow-y-auto transition-[width] duration-200 ease-in-out motion-reduce:transition-none ${collapsed ? 'w-14' : 'w-60'} ${className}`}
     >
       <div className="flex flex-col gap-sm py-md">
         {React.Children.map(children, (child) => {
@@ -107,6 +110,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ children, className = '', coll
           return child;
         })}
       </div>
-    </aside>
+    </nav>
   );
 };

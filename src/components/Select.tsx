@@ -42,7 +42,7 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, placeholde
     </SelectPrimitive.Trigger>
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
-        className="bg-surface-overlay rounded-md shadow-overlay p-xs min-w-[var(--radix-select-trigger-width)] z-50 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-150"
+        className="bg-surface-overlay rounded-md shadow-overlay p-xs min-w-[var(--radix-select-trigger-width)] z-50 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-150 motion-reduce:animate-none"
         position="popper"
         sideOffset={4}
       >

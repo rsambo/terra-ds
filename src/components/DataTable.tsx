@@ -37,7 +37,7 @@ export const DataTableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement>> =
   className = '',
   ...props
 }) => (
-  <tr className={`border-b border-border-subtle transition-colors ${className}`} {...props}>
+  <tr className={`border-b border-border-subtle transition-colors ${className}`} role="row" {...props}>
     {children}
   </tr>
 );
@@ -93,8 +93,8 @@ export function DataTable<T extends { id: string | number }>({
 
   return (
     <div className={`overflow-x-auto rounded-lg border border-border-subtle ${className}`}>
-      <table className="w-full border-collapse">
-        <thead className="bg-surface">
+      <table className="w-full border-collapse" role={selectable ? 'grid' : 'table'}>
+        <thead className="bg-surface" role="rowgroup">
           <DataTableRow>
             {selectable && (
               <DataTableHeader className="w-12">
@@ -127,7 +127,7 @@ export function DataTable<T extends { id: string | number }>({
             })}
           </DataTableRow>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {rows.length === 0 ? (
             <DataTableRow>
               <td colSpan={colCount} className="px-md py-2xl text-center">
@@ -144,7 +144,15 @@ export function DataTable<T extends { id: string | number }>({
                   key={row.id}
                   className={`${
                     isSelected ? 'bg-accent-container' : 'bg-surface-raised'
-                  } text-on-surface hover:bg-surface-overlay`}
+                  } text-on-surface hover:bg-surface-overlay ${selectable ? 'focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:outline-none' : ''}`}
+                  tabIndex={selectable ? 0 : undefined}
+                  aria-selected={selectable ? isSelected : undefined}
+                  onKeyDown={(e) => {
+                    if (selectable && e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectRow(row.id);
+                    }
+                  }}
                 >
                   {selectable && (
                     <DataTableCell className="w-12">

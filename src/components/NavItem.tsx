@@ -7,7 +7,7 @@ export interface NavItemProps extends React.AnchorHTMLAttributes<HTMLAnchorEleme
 
 export const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(
   ({ active, onClick, className = '', children, href, ...props }, ref) => {
-    const base = 'inline-flex items-center font-label-lg rounded-sm px-md py-sm transition-colors focus:outline-none focus:ring-2 focus:ring-focus-ring';
+    const base = 'inline-flex items-center font-label-lg rounded-sm px-md py-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring';
 
     const state = active
       ? 'bg-accent text-on-accent'
