@@ -481,6 +481,61 @@ components:
     textColor: '{colors.on-surface-muted}'
     rounded: '{rounded.none}'
     padding: '{spacing.xs} {spacing.md}'
+  avatar:
+    backgroundColor: '{colors.secondary}'
+    textColor: '{colors.on-secondary}'
+    rounded: '{rounded.full}'
+    padding: '{spacing.xs}'
+  avatar-muted:
+    backgroundColor: '{colors.neutral}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.full}'
+    padding: '{spacing.xs}'
+  toast:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.lg}'
+    padding: '{spacing.sm} {spacing.md}'
+  toast-success:
+    backgroundColor: '{colors.primary}'
+    textColor: '{colors.on-primary}'
+    rounded: '{rounded.lg}'
+    padding: '{spacing.sm} {spacing.md}'
+  toast-error:
+    backgroundColor: '{colors.error}'
+    textColor: '{colors.on-error}'
+    rounded: '{rounded.lg}'
+    padding: '{spacing.sm} {spacing.md}'
+  skeleton:
+    backgroundColor: '{colors.neutral}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.md}'
+    padding: '{spacing.xs}'
+  empty-state:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.lg}'
+    padding: '{spacing.2xl}'
+  table-header:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.on-surface-muted}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.sm} {spacing.md}'
+  table-row:
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.sm} {spacing.md}'
+  table-row-hover:
+    backgroundColor: '{colors.surface-overlay}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.sm} {spacing.md}'
+  table-row-selected:
+    backgroundColor: '{colors.accent-container}'
+    textColor: '{colors.on-surface}'
+    rounded: '{rounded.none}'
+    padding: '{spacing.sm} {spacing.md}'
 ---
 
 ## Overview
