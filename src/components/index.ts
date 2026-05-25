@@ -75,6 +75,9 @@ export type { AppShellProps } from './AppShell';
 export { CommandMenu, CommandMenuSection, CommandMenuItem } from './CommandMenu';
 export type { CommandMenuProps, CommandMenuSectionProps, CommandMenuItemProps } from './CommandMenu';
 
+export { ThemeProvider, useTheme } from './ThemeProvider';
+export type { ThemeProviderProps, ThemeContextValue } from './ThemeProvider';
+
 export { Avatar, AvatarGroup } from './Avatar';
 export type { AvatarProps, AvatarGroupProps } from './Avatar';
 

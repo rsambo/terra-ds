@@ -1,3 +1,10 @@
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.dark {
+  --shadow-raised: 0 1px 4px rgba(0,0,0,0.3), 0 0 1px rgba(0,0,0,0.2);
+  --shadow-overlay: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25);
+}
