@@ -116,7 +116,10 @@ function patchFile(content, payload, isDark) {
           }
         }
       }
-    } else if (inBlock === 'spacing' && payload.spacing) {
+    } else if (inBlock === 'spacing' && payload.spacing && !isDark) {
+      // spacing/rounded/typography are theme-agnostic — only patch the light
+      // spec (DESIGN.md). Writing them to DESIGN.dark.md too would diverge the
+      // specs (the generator reads these categories from DESIGN.md only).
       for (const [name, val] of Object.entries(payload.spacing)) {
         const re = new RegExp(`^(\\s*${name}:\\s*)(.+)$`);
         if (re.test(trimmed)) {
@@ -124,7 +127,7 @@ function patchFile(content, payload, isDark) {
           break;
         }
       }
-    } else if (inBlock === 'rounded' && payload.rounded) {
+    } else if (inBlock === 'rounded' && payload.rounded && !isDark) {
       for (const [name, val] of Object.entries(payload.rounded)) {
         const re = new RegExp(`^(\\s*${name}:\\s*)(.+)$`);
         if (re.test(trimmed)) {
@@ -132,7 +135,7 @@ function patchFile(content, payload, isDark) {
           break;
         }
       }
-    } else if (inBlock === 'typography' && inRole && payload.typography && payload.typography[inRole]) {
+    } else if (inBlock === 'typography' && inRole && payload.typography && payload.typography[inRole] && !isDark) {
       const roleProps = payload.typography[inRole];
       for (const [prop, val] of Object.entries(roleProps)) {
         const re = new RegExp(`^(\\s*${prop}:\\s*)(.+)$`);
