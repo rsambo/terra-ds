@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Card, Input } from '../../src/components';
 import {
   TYPOGRAPHY_ROLES,
   TYPOGRAPHY_FAMILY_STACKS,
@@ -30,7 +31,6 @@ export const TypographyEditors: React.FC<Props> = ({ overrides, onChange }) => {
       });
       def[role.name] = r;
     });
-    // Family stacks from first role of each register
     const families: Record<string, string> = {};
     TYPOGRAPHY_FAMILY_STACKS.forEach((stack) => {
       const firstRole = TYPOGRAPHY_ROLES.find((r) => r.register === stack.key);
@@ -44,7 +44,6 @@ export const TypographyEditors: React.FC<Props> = ({ overrides, onChange }) => {
   const current = (role: string, prop: string) => {
     const ov = overrides[role]?.[prop];
     if (ov) return ov;
-    // If family stack override exists, apply it to all roles of that register
     if (prop === 'fontFamily') {
       const register = TYPOGRAPHY_ROLES.find((r) => r.name === role)?.register;
       if (register && familyOverrides[register]) return familyOverrides[register];
@@ -69,23 +68,23 @@ export const TypographyEditors: React.FC<Props> = ({ overrides, onChange }) => {
       </div>
 
       {/* Family stacks */}
-      <div className="bg-surface-raised border border-border-subtle rounded-lg p-md space-y-md">
+      <Card className="border border-border-subtle p-md space-y-md">
         <div className="font-label-lg text-on-surface">Family Stacks</div>
         {TYPOGRAPHY_FAMILY_STACKS.map((stack) => (
           <div key={stack.key} className="flex items-center gap-sm">
             <label className="font-label-sm text-on-surface-muted w-24">{stack.title}</label>
-            <input
+            <Input
               type="text"
               value={familyOverrides[stack.key] ?? defaults.families[stack.key] ?? stack.default}
               onChange={(e) => handleFamilyStackChange(stack.key, e.target.value)}
-              className="font-code-md text-sm flex-1 px-sm py-xs rounded-md border border-border bg-surface text-on-surface"
+              className="font-code-md text-sm flex-1"
             />
           </div>
         ))}
-      </div>
+      </Card>
 
       {/* Per-role table */}
-      <div className="bg-surface-raised border border-border-subtle rounded-lg overflow-hidden">
+      <Card className="border border-border-subtle overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-surface border-b border-border-subtle">
@@ -107,14 +106,14 @@ export const TypographyEditors: React.FC<Props> = ({ overrides, onChange }) => {
                   </td>
                   {PROPS.map((p) => (
                     <td key={p.key} className="px-sm py-xs align-top">
-                      <input
+                      <Input
                         type="text"
                         value={current(role.name, p.key)}
                         onChange={(e) => {
                           const v = e.target.value.trim();
                           onChange(role.name, p.key, v || undefined);
                         }}
-                        className="font-code-md text-sm w-20 px-sm py-xs rounded-md border border-border bg-surface text-on-surface"
+                        className="font-code-md text-sm w-20"
                       />
                     </td>
                   ))}
@@ -123,21 +122,21 @@ export const TypographyEditors: React.FC<Props> = ({ overrides, onChange }) => {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Type specimens */}
       <div className="space-y-md">
         <div className="font-label-lg text-on-surface">Type Specimens</div>
         {TYPOGRAPHY_ROLES.map((role) => (
-          <div
+          <Card
             key={role.name}
-            className="bg-surface-raised border border-border-subtle rounded-lg p-md"
+            className="border border-border-subtle p-md"
           >
             <div className="font-label-sm text-on-surface-muted mb-xs">{role.title}</div>
             <div className={`font-${role.name}`}>
               The quick brown fox jumps over the lazy dog.
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

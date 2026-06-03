@@ -1,5 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Card,
+  Input,
+  Button,
+  Badge,
+  Tooltip,
+} from '../../src/components';
+import {
   COLOR_GROUPS,
   ALL_COLOR_TOKENS,
   CONTRAST_PAIRS,
@@ -89,9 +96,9 @@ export const ColorEditors: React.FC<Props> = ({ theme, overrides, onChange }) =>
               const worst = badges.length > 0 ? badges.reduce((w, b) => (b.ratio < w.ratio ? b : w)) : null;
 
               return (
-                <div
+                <Card
                   key={token.name}
-                  className="flex gap-sm items-start bg-surface-raised border border-border-subtle rounded-lg p-sm"
+                  className="flex gap-sm items-start border border-border-subtle p-sm"
                 >
                   <div
                     className="w-12 h-12 rounded-md border border-border shrink-0 mt-0.5"
@@ -100,22 +107,24 @@ export const ColorEditors: React.FC<Props> = ({ theme, overrides, onChange }) =>
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-sm flex-wrap">
-                      <span className="font-label-sm text-on-surface">{token.title}</span>
-                      {edited && <span className="font-label-sm text-accent">● edited</span>}
+                      <Tooltip content={token.description} side="top">
+                        <span className="font-label-sm text-on-surface">{token.title}</span>
+                      </Tooltip>
+                      {edited && <Badge variant="accent">edited</Badge>}
                       {worst && (
-                        <span
-                          className={`font-label-sm px-xs py-2xs rounded-full ${
+                        <Badge
+                          variant={
                             worst.level === 'AA'
-                              ? 'bg-primary/10 text-primary'
+                              ? 'default'
                               : worst.level === 'AA-large'
-                              ? 'bg-accent/10 text-accent'
-                              : 'bg-error/10 text-error'
-                          }`}
+                              ? 'accent'
+                              : 'error'
+                          }
                         >
                           {worst.level === 'AA' ? '✓ AA' : worst.level === 'AA-large' ? '⚠ AA-large' : '✗ Fail'}
                           {' '}
                           {worst.ratio.toFixed(1)}:1
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     <code className="font-code-md text-on-surface-muted text-xs">
@@ -130,27 +139,26 @@ export const ColorEditors: React.FC<Props> = ({ theme, overrides, onChange }) =>
                         onChange={(e) => handlePick(token.name, e.target.value)}
                         className="w-8 h-8 rounded-md border border-border bg-transparent cursor-pointer p-0"
                       />
-                      <input
+                      <Input
                         type="text"
                         aria-label={`${token.title} hex value`}
                         spellCheck={false}
                         value={val}
                         onChange={(e) => handleHexInput(token.name, e.target.value)}
-                        className={`font-code-md text-sm w-24 px-sm py-xs rounded-md border bg-surface text-on-surface ${
-                          val && !HEX_RE.test(val) ? 'border-error' : 'border-border'
-                        }`}
+                        error={val && !HEX_RE.test(val)}
+                        className="font-code-md text-sm w-24"
                       />
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
                         onClick={() => handleReset(token.name)}
                         disabled={!edited}
-                        className="font-label-sm text-on-surface-muted underline disabled:opacity-40 disabled:no-underline disabled:cursor-default"
+                        className="font-label-sm underline disabled:no-underline"
                       >
                         Reset
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>

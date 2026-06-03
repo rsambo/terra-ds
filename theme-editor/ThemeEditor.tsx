@@ -5,6 +5,18 @@ import { SpacingEditors } from './editors/SpacingEditors';
 import { RadiusEditors } from './editors/RadiusEditors';
 import { TypographyEditors } from './editors/TypographyEditors';
 import {
+  Button,
+  Toggle,
+  Callout,
+  TabsRoot,
+  TabList,
+  Tab,
+  TabContent,
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '../src/components';
+import {
   ALL_COLOR_TOKENS,
   ALL_SPACING_TOKENS,
   ALL_RADIUS_TOKENS,
@@ -55,7 +67,6 @@ const readVar = (prefix: string, name: string) =>
 
 function applyOverrides(state: EditorState) {
   const root = document.documentElement;
-  // Colors
   ALL_COLOR_TOKENS.forEach((name) => {
     const light = state.colors.light[name];
     const dark = state.colors.dark[name];
@@ -64,19 +75,16 @@ function applyOverrides(state: EditorState) {
     if (dark && root.classList.contains('dark')) root.style.setProperty(`--color-${name}`, dark);
     else if (!light && root.classList.contains('dark')) root.style.removeProperty(`--color-${name}`);
   });
-  // Spacing
   ALL_SPACING_TOKENS.forEach((name) => {
     const v = state.spacing[name];
     if (v) root.style.setProperty(`--spacing-${name}`, v);
     else root.style.removeProperty(`--spacing-${name}`);
   });
-  // Radius
   ALL_RADIUS_TOKENS.forEach((name) => {
     const v = state.radius[name];
     if (v) root.style.setProperty(`--rounded-${name}`, v);
     else root.style.removeProperty(`--rounded-${name}`);
   });
-  // Typography
   ALL_TYPOGRAPHY_ROLES.forEach((role) => {
     const ov = state.typography[role] || {};
     if (ov.fontFamily) root.style.setProperty(`--font-family-${role}`, ov.fontFamily);
@@ -115,19 +123,16 @@ export const ThemeEditor: React.FC = () => {
   const [showLifeline, setShowLifeline] = useState(false);
   const importRef = React.useRef<HTMLInputElement>(null);
 
-  // Apply overrides whenever state or theme changes
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     applyOverrides(state);
     saveState(state);
   }, [state, theme]);
 
-  // Clear overrides on unmount
   useEffect(() => {
     return () => clearOverrides();
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === '0') {
@@ -237,7 +242,6 @@ export const ThemeEditor: React.FC = () => {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Save failed');
-      // Clear overrides — they are now the defaults
       setState({ colors: { light: {}, dark: {} }, spacing: {}, radius: {}, typography: {} });
     } catch (err: any) {
       setSaveError(err?.message || String(err));
@@ -245,13 +249,6 @@ export const ThemeEditor: React.FC = () => {
       setSaving(false);
     }
   }, [state]);
-
-  const badges: string[] = [];
-  if (editedCounts.lightColors) badges.push(`● ${editedCounts.lightColors} light`);
-  if (editedCounts.darkColors) badges.push(`● ${editedCounts.darkColors} dark`);
-  if (editedCounts.spacing) badges.push(`● ${editedCounts.spacing} spacing`);
-  if (editedCounts.radius) badges.push(`● ${editedCounts.radius} radius`);
-  if (editedCounts.typography) badges.push(`● ${editedCounts.typography} typography`);
 
   const handleExport = useCallback(() => {
     const root = getComputedStyle(document.documentElement);
@@ -341,58 +338,52 @@ export const ThemeEditor: React.FC = () => {
     e.target.value = '';
   }, []);
 
+  const badges: string[] = [];
+  if (editedCounts.lightColors) badges.push(`● ${editedCounts.lightColors} light`);
+  if (editedCounts.darkColors) badges.push(`● ${editedCounts.darkColors} dark`);
+  if (editedCounts.spacing) badges.push(`● ${editedCounts.spacing} spacing`);
+  if (editedCounts.radius) badges.push(`● ${editedCounts.radius} radius`);
+  if (editedCounts.typography) badges.push(`● ${editedCounts.typography} typography`);
+
   return (
     <div className="h-screen flex flex-col bg-surface text-on-surface font-body-md overflow-hidden">
       {/* Toolbar */}
       <header className="shrink-0 flex items-center justify-between gap-md px-lg py-sm border-b border-border-subtle bg-surface-raised">
         <div className="flex items-center gap-md">
           <h1 className="font-heading-sm">Terra DS Theme Editor</h1>
-          <div className="flex items-center gap-xs bg-surface rounded-md p-xs">
-            {(['colors', 'spacing', 'radius', 'typography'] as Category[]).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`font-label-sm rounded-sm px-md py-sm transition-colors ${
-                  category === cat
-                    ? 'bg-surface-raised text-on-surface'
-                    : 'text-on-surface-muted hover:bg-surface-raised hover:text-on-surface'
-                }`}
-              >
-                {cat[0].toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
-          </div>
+          <TabsRoot value={category} onValueChange={(v) => setCategory(v as Category)}>
+            <TabList>
+              {(['colors', 'spacing', 'radius', 'typography'] as Category[]).map((cat) => (
+                <Tab key={cat} value={cat}>
+                  {cat[0].toUpperCase() + cat.slice(1)}
+                </Tab>
+              ))}
+            </TabList>
+          </TabsRoot>
         </div>
 
         <div className="flex items-center gap-md flex-wrap">
-          <div className="flex items-center gap-xs">
-            <span className="font-label-sm text-on-surface-muted">Theme</span>
-            <button
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className={`font-label-sm rounded-full px-sm py-2xs transition-colors ${
-                theme === 'dark' ? 'bg-primary text-on-primary' : 'bg-neutral text-on-surface-muted'
-              }`}
-            >
-              {theme === 'light' ? 'Light' : 'Dark'}
-            </button>
-          </div>
+          <Toggle
+            checked={theme === 'dark'}
+            onCheckedChange={(v) => setTheme(v ? 'dark' : 'light')}
+            label={theme === 'light' ? 'Light' : 'Dark'}
+          />
 
           {badges.length > 0 && (
             <span className="font-label-sm text-accent">{badges.join(' · ')}</span>
           )}
 
-          <button
-            onClick={handleExport}
-            className="font-label-sm bg-surface text-on-surface border border-border rounded-md px-md py-sm hover:bg-surface-raised transition-colors"
+          <DropdownMenu
+            trigger={
+              <Button variant="ghost" className="font-label-sm">
+                Export / Import
+              </Button>
+            }
           >
-            Export
-          </button>
-          <button
-            onClick={() => importRef.current?.click()}
-            className="font-label-sm bg-surface text-on-surface border border-border rounded-md px-md py-sm hover:bg-surface-raised transition-colors"
-          >
-            Import
-          </button>
+            <DropdownMenuItem onClick={handleExport}>Export theme.json</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => importRef.current?.click()}>Import theme.json</DropdownMenuItem>
+          </DropdownMenu>
           <input
             ref={importRef}
             type="file"
@@ -401,20 +392,20 @@ export const ThemeEditor: React.FC = () => {
             onChange={handleImport}
           />
 
-          <button
+          <Button
+            variant="primary"
             onClick={handleSave}
             disabled={editedCounts.total === 0 || saving}
-            className="font-label-sm bg-accent text-on-accent rounded-md px-md py-sm disabled:opacity-40 disabled:cursor-default hover:opacity-90 transition-opacity"
           >
             {saving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
       </header>
 
       {saveError && (
-        <div className="shrink-0 px-lg py-sm bg-error/10 text-error border-b border-error/20 font-body-sm">
+        <Callout className="shrink-0 rounded-none border-b border-error/20 bg-error/10 text-error font-body-sm">
           Save failed: {saveError}
-        </div>
+        </Callout>
       )}
 
       {/* Contrast summary */}
@@ -432,31 +423,33 @@ export const ThemeEditor: React.FC = () => {
       {/* Main split */}
       <div className="flex-1 flex overflow-hidden">
         <div className="w-[420px] min-w-[320px] overflow-y-auto border-r border-border-subtle bg-surface">
-          {category === 'colors' && (
-            <ColorEditors
-              theme={theme}
-              overrides={state.colors}
-              onChange={updateColors}
-            />
-          )}
-          {category === 'spacing' && (
-            <SpacingEditors
-              overrides={state.spacing}
-              onChange={updateSpacing}
-            />
-          )}
-          {category === 'radius' && (
-            <RadiusEditors
-              overrides={state.radius}
-              onChange={updateRadius}
-            />
-          )}
-          {category === 'typography' && (
-            <TypographyEditors
-              overrides={state.typography}
-              onChange={updateTypography}
-            />
-          )}
+          <TabsRoot value={category} onValueChange={(v) => setCategory(v as Category)}>
+            <TabContent value="colors">
+              <ColorEditors
+                theme={theme}
+                overrides={state.colors}
+                onChange={updateColors}
+              />
+            </TabContent>
+            <TabContent value="spacing">
+              <SpacingEditors
+                overrides={state.spacing}
+                onChange={updateSpacing}
+              />
+            </TabContent>
+            <TabContent value="radius">
+              <RadiusEditors
+                overrides={state.radius}
+                onChange={updateRadius}
+              />
+            </TabContent>
+            <TabContent value="typography">
+              <TypographyEditors
+                overrides={state.typography}
+                onChange={updateTypography}
+              />
+            </TabContent>
+          </TabsRoot>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-surface">
@@ -464,7 +457,7 @@ export const ThemeEditor: React.FC = () => {
         </div>
       </div>
 
-      {/* Safety lifeline */}
+      {/* Safety lifeline — raw fixed-style element, never DS */}
       <button
         onClick={() => setShowLifeline((s) => !s)}
         className="fixed bottom-4 right-4 z-50"

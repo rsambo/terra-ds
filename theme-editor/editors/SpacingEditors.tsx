@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Card, Input, Button, Badge } from '../../src/components';
 import { SPACING_META } from '../../tokens-meta';
 
 interface Props {
@@ -34,9 +35,9 @@ export const SpacingEditors: React.FC<Props> = ({ overrides, onChange }) => {
           const val = current(meta.name);
           const edited = overrides[meta.name] !== undefined;
           return (
-            <div
+            <Card
               key={meta.name}
-              className="flex gap-sm items-center bg-surface-raised border border-border-subtle rounded-lg p-sm"
+              className="flex gap-sm items-center border border-border-subtle p-sm"
             >
               <div className="w-24 shrink-0">
                 <div className="font-label-sm text-on-surface">{meta.title}</div>
@@ -48,7 +49,7 @@ export const SpacingEditors: React.FC<Props> = ({ overrides, onChange }) => {
                   style={{ width: val, height: '16px' }}
                   aria-hidden
                 />
-                <input
+                <Input
                   type="text"
                   value={val}
                   onChange={(e) => {
@@ -56,27 +57,26 @@ export const SpacingEditors: React.FC<Props> = ({ overrides, onChange }) => {
                     if (DIM_RE.test(v)) onChange(meta.name, v);
                     else if (v === '') onChange(meta.name, undefined);
                   }}
-                  className={`font-code-md text-sm w-24 px-sm py-xs rounded-md border bg-surface text-on-surface ${
-                    val && !DIM_RE.test(val) ? 'border-error' : 'border-border'
-                  }`}
+                  error={val && !DIM_RE.test(val)}
+                  className="font-code-md text-sm w-24"
                 />
-                {edited && <span className="font-label-sm text-accent">● edited</span>}
-                <button
-                  type="button"
+                {edited && <Badge variant="accent">edited</Badge>}
+                <Button
+                  variant="ghost"
                   onClick={() => onChange(meta.name, undefined)}
                   disabled={!edited}
-                  className="font-label-sm text-on-surface-muted underline disabled:opacity-40 disabled:no-underline disabled:cursor-default ml-auto"
+                  className="font-label-sm underline disabled:no-underline ml-auto"
                 >
                   Reset
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
 
       {/* Visual ramp */}
-      <div className="bg-surface-raised border border-border-subtle rounded-lg p-md">
+      <Card className="border border-border-subtle p-md">
         <div className="font-label-sm text-on-surface-muted mb-sm">Visual ramp</div>
         <div className="flex flex-col gap-sm">
           {SPACING_META.map((meta) => {
@@ -94,7 +94,7 @@ export const SpacingEditors: React.FC<Props> = ({ overrides, onChange }) => {
             );
           })}
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
