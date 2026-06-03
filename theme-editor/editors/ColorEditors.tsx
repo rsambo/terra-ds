@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Card,
   Input,
@@ -8,12 +8,20 @@ import {
 } from '../../src/components';
 import {
   COLOR_GROUPS,
-  ALL_COLOR_TOKENS,
   CONTRAST_PAIRS,
   contrastRatio,
   wcagLevel,
 } from '../../tokens-meta';
 import type { ColorOverrides } from '../ThemeEditor';
+import lightThemeJson from '../../dist/tokens/tailwind.theme.json';
+import darkThemeJson from '../../dist/tokens/tailwind.dark.theme.json';
+
+// Per-theme color defaults sourced from the generated tokens (deterministic),
+// not from getComputedStyle — the DOM's `.dark` class is toggled in a parent
+// effect that runs after this component renders, so reading it here returns the
+// wrong theme's values.
+const LIGHT_COLORS = lightThemeJson.theme.extend.colors as Record<string, string>;
+const DARK_COLORS = darkThemeJson.theme.extend.colors as Record<string, string>;
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 const COLOR_INPUT_FALLBACK = '#' + '000000';
@@ -29,17 +37,19 @@ interface Props {
 export const ColorEditors: React.FC<Props> = ({ theme, overrides, onChange }) => {
   const [values, setValues] = useState<Record<string, string>>({});
 
-  const defaults = useMemo(() => {
-    const def: Record<string, string> = {};
-    ALL_COLOR_TOKENS.forEach((n) => {
-      const v = getComputedStyle(document.documentElement).getPropertyValue(`--color-${n}`).trim();
-      def[n] = v;
-    });
-    return def;
+  const defaults = useMemo(
+    () => (theme === 'dark' ? DARK_COLORS : LIGHT_COLORS),
+    [theme],
+  );
+
+  // The transient typing buffer is not theme-scoped; clear it when the theme
+  // switches so a value typed in one theme doesn't bleed into the other.
+  useEffect(() => {
+    setValues({});
   }, [theme]);
 
   const currentValue = (name: string) => {
-    return overrides[theme][name] ?? values[name] ?? defaults[name] ?? '#000000';
+    return overrides[theme][name] ?? values[name] ?? defaults[name] ?? COLOR_INPUT_FALLBACK;
   };
 
   const handlePick = (name: string, hex: string) => {

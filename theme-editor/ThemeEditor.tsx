@@ -422,7 +422,7 @@ export const ThemeEditor: React.FC = () => {
 
       {/* Main split */}
       <div className="flex-1 flex overflow-hidden">
-        <div className="w-[420px] min-w-[320px] overflow-y-auto border-r border-border-subtle bg-surface">
+        <div className="flex-1 min-w-0 overflow-y-auto border-r border-border-subtle bg-surface">
           <TabsRoot value={category} onValueChange={(v) => setCategory(v as Category)}>
             <TabContent value="colors">
               <ColorEditors
