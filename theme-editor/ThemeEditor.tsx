@@ -1,0 +1,420 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Sampler } from './Sampler';
+import { ColorEditors } from './editors/ColorEditors';
+import { SpacingEditors } from './editors/SpacingEditors';
+import { RadiusEditors } from './editors/RadiusEditors';
+import { TypographyEditors } from './editors/TypographyEditors';
+import {
+  ALL_COLOR_TOKENS,
+  ALL_SPACING_TOKENS,
+  ALL_RADIUS_TOKENS,
+  ALL_TYPOGRAPHY_ROLES,
+  CONTRAST_PAIRS,
+  contrastRatio,
+  wcagLevel,
+} from '../tokens-meta';
+
+type Theme = 'light' | 'dark';
+type Category = 'colors' | 'spacing' | 'radius' | 'typography';
+
+export type ColorOverrides = Record<Theme, Record<string, string>>;
+export type SpacingOverrides = Record<string, string>;
+export type RadiusOverrides = Record<string, string>;
+export type TypographyOverrides = Record<string, Record<string, string>>;
+
+export interface EditorState {
+  colors: ColorOverrides;
+  spacing: SpacingOverrides;
+  radius: RadiusOverrides;
+  typography: TypographyOverrides;
+}
+
+const STORAGE_KEY = 'terra-ds:theme-editor';
+
+function loadState(): EditorState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return {
+    colors: { light: {}, dark: {} },
+    spacing: {},
+    radius: {},
+    typography: {},
+  };
+}
+
+function saveState(state: EditorState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch { /* ignore */ }
+}
+
+const readVar = (prefix: string, name: string) =>
+  getComputedStyle(document.documentElement).getPropertyValue(`--${prefix}-${name}`).trim();
+
+function applyOverrides(state: EditorState) {
+  const root = document.documentElement;
+  // Colors
+  ALL_COLOR_TOKENS.forEach((name) => {
+    const light = state.colors.light[name];
+    const dark = state.colors.dark[name];
+    if (light && !root.classList.contains('dark')) root.style.setProperty(`--color-${name}`, light);
+    else if (!dark && !root.classList.contains('dark')) root.style.removeProperty(`--color-${name}`);
+    if (dark && root.classList.contains('dark')) root.style.setProperty(`--color-${name}`, dark);
+    else if (!light && root.classList.contains('dark')) root.style.removeProperty(`--color-${name}`);
+  });
+  // Spacing
+  ALL_SPACING_TOKENS.forEach((name) => {
+    const v = state.spacing[name];
+    if (v) root.style.setProperty(`--spacing-${name}`, v);
+    else root.style.removeProperty(`--spacing-${name}`);
+  });
+  // Radius
+  ALL_RADIUS_TOKENS.forEach((name) => {
+    const v = state.radius[name];
+    if (v) root.style.setProperty(`--rounded-${name}`, v);
+    else root.style.removeProperty(`--rounded-${name}`);
+  });
+  // Typography
+  ALL_TYPOGRAPHY_ROLES.forEach((role) => {
+    const ov = state.typography[role] || {};
+    if (ov.fontFamily) root.style.setProperty(`--font-family-${role}`, ov.fontFamily);
+    else root.style.removeProperty(`--font-family-${role}`);
+    if (ov.fontSize) root.style.setProperty(`--font-size-${role}`, ov.fontSize);
+    else root.style.removeProperty(`--font-size-${role}`);
+    if (ov.fontWeight) root.style.setProperty(`--font-weight-${role}`, ov.fontWeight);
+    else root.style.removeProperty(`--font-weight-${role}`);
+    if (ov.lineHeight) root.style.setProperty(`--line-height-${role}`, ov.lineHeight);
+    else root.style.removeProperty(`--line-height-${role}`);
+    if (ov.letterSpacing) root.style.setProperty(`--letter-spacing-${role}`, ov.letterSpacing);
+    else root.style.removeProperty(`--letter-spacing-${role}`);
+  });
+}
+
+function clearOverrides() {
+  const root = document.documentElement;
+  ALL_COLOR_TOKENS.forEach((n) => root.style.removeProperty(`--color-${n}`));
+  ALL_SPACING_TOKENS.forEach((n) => root.style.removeProperty(`--spacing-${n}`));
+  ALL_RADIUS_TOKENS.forEach((n) => root.style.removeProperty(`--rounded-${n}`));
+  ALL_TYPOGRAPHY_ROLES.forEach((role) => {
+    root.style.removeProperty(`--font-family-${role}`);
+    root.style.removeProperty(`--font-size-${role}`);
+    root.style.removeProperty(`--font-weight-${role}`);
+    root.style.removeProperty(`--line-height-${role}`);
+    root.style.removeProperty(`--letter-spacing-${role}`);
+  });
+}
+
+export const ThemeEditor: React.FC = () => {
+  const [theme, setTheme] = useState<Theme>('light');
+  const [category, setCategory] = useState<Category>('colors');
+  const [state, setState] = useState<EditorState>(loadState);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [showLifeline, setShowLifeline] = useState(false);
+
+  // Apply overrides whenever state or theme changes
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    applyOverrides(state);
+    saveState(state);
+  }, [state, theme]);
+
+  // Clear overrides on unmount
+  useEffect(() => {
+    return () => clearOverrides();
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '0') {
+        e.preventDefault();
+        handleResetAll();
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleRevertLast();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [state]);
+
+  const handleResetAll = useCallback(() => {
+    setState({ colors: { light: {}, dark: {} }, spacing: {}, radius: {}, typography: {} });
+  }, []);
+
+  const [lastState, setLastState] = useState<EditorState | null>(null);
+
+  const handleRevertLast = useCallback(() => {
+    if (lastState) {
+      setState(lastState);
+      setLastState(null);
+    }
+  }, [lastState]);
+
+  const updateColors = useCallback((themeKey: Theme, name: string, value: string | undefined) => {
+    setLastState((prev) => prev || JSON.parse(JSON.stringify(state)));
+    setState((s) => {
+      const next = { ...s, colors: { ...s.colors, [themeKey]: { ...s.colors[themeKey] } } };
+      if (value === undefined) delete next.colors[themeKey][name];
+      else next.colors[themeKey][name] = value;
+      return next;
+    });
+  }, [state]);
+
+  const updateSpacing = useCallback((name: string, value: string | undefined) => {
+    setLastState((prev) => prev || JSON.parse(JSON.stringify(state)));
+    setState((s) => {
+      const next = { ...s, spacing: { ...s.spacing } };
+      if (value === undefined) delete next.spacing[name];
+      else next.spacing[name] = value;
+      return next;
+    });
+  }, [state]);
+
+  const updateRadius = useCallback((name: string, value: string | undefined) => {
+    setLastState((prev) => prev || JSON.parse(JSON.stringify(state)));
+    setState((s) => {
+      const next = { ...s, radius: { ...s.radius } };
+      if (value === undefined) delete next.radius[name];
+      else next.radius[name] = value;
+      return next;
+    });
+  }, [state]);
+
+  const updateTypography = useCallback((role: string, prop: string, value: string | undefined) => {
+    setLastState((prev) => prev || JSON.parse(JSON.stringify(state)));
+    setState((s) => {
+      const next = { ...s, typography: { ...s.typography, [role]: { ...(s.typography[role] || {}) } } };
+      if (value === undefined) delete next.typography[role][prop];
+      else next.typography[role][prop] = value;
+      return next;
+    });
+  }, [state]);
+
+  const editedCounts = useMemo(() => {
+    const lightColors = Object.keys(state.colors.light).length;
+    const darkColors = Object.keys(state.colors.dark).length;
+    const spacing = Object.keys(state.spacing).length;
+    const radius = Object.keys(state.radius).length;
+    const typography = Object.values(state.typography).reduce((sum, r) => sum + Object.keys(r).length, 0);
+    return { lightColors, darkColors, spacing, radius, typography, total: lightColors + darkColors + spacing + radius + typography };
+  }, [state]);
+
+  const contrastSummary = useMemo(() => {
+    const root = getComputedStyle(document.documentElement);
+    const getColor = (name: string) => root.getPropertyValue(`--color-${name}`).trim();
+    let fail = 0;
+    let aaLarge = 0;
+    let aa = 0;
+    for (const pair of CONTRAST_PAIRS) {
+      const ratio = contrastRatio(getColor(pair.fg), getColor(pair.bg));
+      const level = wcagLevel(ratio);
+      if (level === 'fail') fail++;
+      else if (level === 'AA-large') aaLarge++;
+      else aa++;
+    }
+    return { fail, aaLarge, aa };
+  }, [state, theme]);
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/__write-tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          colors: state.colors,
+          spacing: state.spacing,
+          rounded: state.radius,
+          typography: state.typography,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Save failed');
+      // Clear overrides — they are now the defaults
+      setState({ colors: { light: {}, dark: {} }, spacing: {}, radius: {}, typography: {} });
+    } catch (err: any) {
+      setSaveError(err?.message || String(err));
+    } finally {
+      setSaving(false);
+    }
+  }, [state]);
+
+  const badges: string[] = [];
+  if (editedCounts.lightColors) badges.push(`● ${editedCounts.lightColors} light`);
+  if (editedCounts.darkColors) badges.push(`● ${editedCounts.darkColors} dark`);
+  if (editedCounts.spacing) badges.push(`● ${editedCounts.spacing} spacing`);
+  if (editedCounts.radius) badges.push(`● ${editedCounts.radius} radius`);
+  if (editedCounts.typography) badges.push(`● ${editedCounts.typography} typography`);
+
+  return (
+    <div className="h-screen flex flex-col bg-surface text-on-surface font-body-md overflow-hidden">
+      {/* Toolbar */}
+      <header className="shrink-0 flex items-center justify-between gap-md px-lg py-sm border-b border-border-subtle bg-surface-raised">
+        <div className="flex items-center gap-md">
+          <h1 className="font-heading-sm">Terra DS Theme Editor</h1>
+          <div className="flex items-center gap-xs bg-surface rounded-md p-xs">
+            {(['colors', 'spacing', 'radius', 'typography'] as Category[]).map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className={`font-label-sm rounded-sm px-md py-sm transition-colors ${
+                  category === cat
+                    ? 'bg-surface-raised text-on-surface'
+                    : 'text-on-surface-muted hover:bg-surface-raised hover:text-on-surface'
+                }`}
+              >
+                {cat[0].toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-md flex-wrap">
+          <div className="flex items-center gap-xs">
+            <span className="font-label-sm text-on-surface-muted">Theme</span>
+            <button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className={`font-label-sm rounded-full px-sm py-2xs transition-colors ${
+                theme === 'dark' ? 'bg-primary text-on-primary' : 'bg-neutral text-on-surface-muted'
+              }`}
+            >
+              {theme === 'light' ? 'Light' : 'Dark'}
+            </button>
+          </div>
+
+          {badges.length > 0 && (
+            <span className="font-label-sm text-accent">{badges.join(' · ')}</span>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={editedCounts.total === 0 || saving}
+            className="font-label-sm bg-accent text-on-accent rounded-md px-md py-sm disabled:opacity-40 disabled:cursor-default hover:opacity-90 transition-opacity"
+          >
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </header>
+
+      {saveError && (
+        <div className="shrink-0 px-lg py-sm bg-error/10 text-error border-b border-error/20 font-body-sm">
+          Save failed: {saveError}
+        </div>
+      )}
+
+      {/* Contrast summary */}
+      <div className="shrink-0 flex items-center gap-sm px-lg py-2xs border-b border-border-subtle bg-surface">
+        <span className="font-label-sm text-on-surface-muted">Contrast:</span>
+        <span className={`font-label-sm ${contrastSummary.fail > 0 ? 'text-error' : 'text-on-surface-muted'}`}>
+          {contrastSummary.fail} fail
+        </span>
+        <span className="font-label-sm text-on-surface-muted">·</span>
+        <span className="font-label-sm text-on-surface-muted">{contrastSummary.aaLarge} AA-large</span>
+        <span className="font-label-sm text-on-surface-muted">·</span>
+        <span className="font-label-sm text-on-surface-muted">{contrastSummary.aa} AA</span>
+      </div>
+
+      {/* Main split */}
+      <div className="flex-1 flex overflow-hidden">
+        <div className="w-[420px] min-w-[320px] overflow-y-auto border-r border-border-subtle bg-surface">
+          {category === 'colors' && (
+            <ColorEditors
+              theme={theme}
+              overrides={state.colors}
+              onChange={updateColors}
+            />
+          )}
+          {category === 'spacing' && (
+            <SpacingEditors
+              overrides={state.spacing}
+              onChange={updateSpacing}
+            />
+          )}
+          {category === 'radius' && (
+            <RadiusEditors
+              overrides={state.radius}
+              onChange={updateRadius}
+            />
+          )}
+          {category === 'typography' && (
+            <TypographyEditors
+              overrides={state.typography}
+              onChange={updateTypography}
+            />
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto bg-surface">
+          <Sampler />
+        </div>
+      </div>
+
+      {/* Safety lifeline */}
+      <button
+        onClick={() => setShowLifeline((s) => !s)}
+        className="fixed bottom-4 right-4 z-50"
+        style={{
+          background: '#ffffff',
+          color: '#1a1a1a',
+          border: '1px solid #cccccc',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          fontSize: '12px',
+          fontWeight: 500,
+          fontFamily: 'system-ui, sans-serif',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          cursor: 'pointer',
+        }}
+      >
+        🛟 Lifeline
+      </button>
+
+      {showLifeline && (
+        <div
+          className="fixed bottom-16 right-4 z-50 flex flex-col gap-2"
+          style={{
+            background: '#ffffff',
+            color: '#1a1a1a',
+            border: '1px solid #cccccc',
+            borderRadius: '8px',
+            padding: '12px',
+            fontSize: '13px',
+            fontFamily: 'system-ui, sans-serif',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            minWidth: '180px',
+          }}
+        >
+          <div className="font-semibold mb-1" style={{ fontFamily: 'system-ui, sans-serif' }}>Safety Lifeline</div>
+          <button
+            onClick={handleRevertLast}
+            disabled={!lastState}
+            className="text-left px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-40"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            ↩ Revert last edit (Esc)
+          </button>
+          <button
+            onClick={handleResetAll}
+            className="text-left px-2 py-1 rounded hover:bg-gray-100"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            ↺ Reset all overrides (⌘0)
+          </button>
+          <button
+            onClick={() => setTheme('light')}
+            className="text-left px-2 py-1 rounded hover:bg-gray-100"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            ☀ Force light theme
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};

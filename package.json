@@ -21,19 +21,20 @@
     "build-storybook": "storybook build",
     "build-tokens": "./build-tokens.sh",
     "generate-css-vars": "node scripts/generate-css-vars.js",
-    "storybook": "storybook dev -p 6006"
+    "storybook": "storybook dev -p 6006",
+    "theme-editor": "vite --config theme-editor/vite.config.ts --port 5174"
   },
   "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "@radix-ui/react-dialog": ">=1.0.0",
-    "@radix-ui/react-tabs": ">=1.0.0",
-    "@radix-ui/react-switch": ">=1.0.0",
     "@radix-ui/react-checkbox": ">=1.0.0",
-    "@radix-ui/react-select": ">=1.0.0",
+    "@radix-ui/react-dialog": ">=1.0.0",
     "@radix-ui/react-dropdown-menu": ">=2.0.0",
+    "@radix-ui/react-select": ">=1.0.0",
+    "@radix-ui/react-switch": ">=1.0.0",
+    "@radix-ui/react-tabs": ">=1.0.0",
+    "@radix-ui/react-toast": ">=1.0.0",
     "@radix-ui/react-tooltip": ">=1.0.0",
-    "@radix-ui/react-toast": ">=1.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "devDependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
@@ -43,6 +44,7 @@
     "@storybook/react-vite": "^8.1.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
