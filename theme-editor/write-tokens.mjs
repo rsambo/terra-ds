@@ -16,7 +16,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DESIGN_MD = path.join(ROOT, 'DESIGN.md');
 const DESIGN_DARK_MD = path.join(ROOT, 'DESIGN.dark.md');
 
-const ALL_COLOR_TOKENS = [
+export const ALL_COLOR_TOKENS = [
   'primary','primary-container','on-primary','secondary','secondary-container','on-secondary',
   'accent','accent-container','on-accent','surface','surface-raised','surface-overlay',
   'on-surface','on-surface-muted','surface-content','surface-content-raised','on-content',
@@ -24,9 +24,9 @@ const ALL_COLOR_TOKENS = [
   'border-subtle','error','on-error','focus-ring','neutral',
 ];
 
-const ALL_SPACING_TOKENS = ['2xs','xs','sm','md','lg','xl','2xl','3xl'];
-const ALL_RADIUS_TOKENS = ['none','sm','md','lg','xl','full'];
-const ALL_TYPOGRAPHY_ROLES = [
+export const ALL_SPACING_TOKENS = ['2xs','xs','sm','md','lg','xl','2xl','3xl'];
+export const ALL_RADIUS_TOKENS = ['none','sm','md','lg','xl','full'];
+export const ALL_TYPOGRAPHY_ROLES = [
   'display-lg','display-sm','heading-xl','heading-lg','heading-md','heading-sm',
   'body-lg','body-md','body-sm','label-lg','label-sm','code-md',
   'content-display','content-heading-lg','content-heading-md','content-heading-sm',
@@ -36,6 +36,18 @@ const TYPOGRAPHY_PROPS = ['fontFamily','fontSize','fontWeight','lineHeight','let
 
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 const DIM_RE = /^\d+(\.\d+)?(px|rem|em|%)$/;
+
+// Render a value as a YAML scalar, double-quoting when it contains characters
+// that would break a plain scalar (commas, quotes, colons, leading -/? etc.).
+// Without this, multi-family font stacks like 'SF Mono', Monaco, monospace
+// corrupt the spec on write-back.
+function yamlScalar(v) {
+  const s = String(v);
+  if (s === '' || /[:#,'"[\]{}&*!|>%@`]/.test(s) || /^[\s\-?]/.test(s) || /\s$/.test(s)) {
+    return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  }
+  return s;
+}
 
 function validatePayload(payload) {
   if (!payload || typeof payload !== 'object') return 'Payload must be an object';
@@ -140,7 +152,7 @@ function patchFile(content, payload, isDark) {
       for (const [prop, val] of Object.entries(roleProps)) {
         const re = new RegExp(`^(\\s*${prop}:\\s*)(.+)$`);
         if (re.test(trimmed)) {
-          line = line.replace(re, `$1${val}`);
+          line = line.replace(re, `$1${yamlScalar(val)}`);
           break;
         }
       }

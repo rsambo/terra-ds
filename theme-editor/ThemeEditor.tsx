@@ -8,6 +8,8 @@ import {
   Button,
   Toggle,
   Callout,
+  Select,
+  SelectItem,
   TabsRoot,
   TabList,
   Tab,
@@ -122,6 +124,21 @@ export const ThemeEditor: React.FC = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showLifeline, setShowLifeline] = useState(false);
   const importRef = React.useRef<HTMLInputElement>(null);
+
+  // Source-design swap: list available DESIGN.md specs and apply one (mapped
+  // onto Terra's fixed token structure by the server, via Claude when needed).
+  const [designs, setDesigns] = useState<string[]>([]);
+  const [selectedDesign, setSelectedDesign] = useState<string>('');
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    fetch('/__list-designs')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok) setDesigns(d.files);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -338,12 +355,34 @@ export const ThemeEditor: React.FC = () => {
     e.target.value = '';
   }, []);
 
-  const badges: string[] = [];
-  if (editedCounts.lightColors) badges.push(`● ${editedCounts.lightColors} light`);
-  if (editedCounts.darkColors) badges.push(`● ${editedCounts.darkColors} dark`);
-  if (editedCounts.spacing) badges.push(`● ${editedCounts.spacing} spacing`);
-  if (editedCounts.radius) badges.push(`● ${editedCounts.radius} radius`);
-  if (editedCounts.typography) badges.push(`● ${editedCounts.typography} typography`);
+  const handleApplyDesign = useCallback(async () => {
+    if (!selectedDesign) return;
+    setApplying(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/__apply-design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: selectedDesign }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Apply failed');
+      const t = data.tokens;
+      // Load the mapped values as overrides so the preview re-themes live.
+      // Persist (Save) writes them back to DESIGN.md / DESIGN.dark.md.
+      setLastState(JSON.parse(JSON.stringify(state)));
+      setState({
+        colors: { light: t.colors.light, dark: t.colors.dark },
+        spacing: t.spacing,
+        radius: t.rounded,
+        typography: t.typography,
+      });
+    } catch (err: any) {
+      setSaveError(err?.message || String(err));
+    } finally {
+      setApplying(false);
+    }
+  }, [selectedDesign, state]);
 
   return (
     <div className="h-screen flex flex-col bg-surface text-on-surface font-body-md overflow-hidden">
@@ -369,8 +408,28 @@ export const ThemeEditor: React.FC = () => {
             label={theme === 'light' ? 'Light' : 'Dark'}
           />
 
-          {badges.length > 0 && (
-            <span className="font-label-sm text-accent">{badges.join(' · ')}</span>
+          {designs.length > 0 && (
+            <div className="flex items-center gap-sm">
+              <Select
+                value={selectedDesign}
+                onValueChange={setSelectedDesign}
+                placeholder="Source design…"
+                disabled={applying}
+              >
+                {designs.map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {f.replace(/\.md$/, '')}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Button
+                variant="secondary"
+                onClick={handleApplyDesign}
+                disabled={!selectedDesign || applying}
+              >
+                {applying ? 'Mapping…' : 'Apply'}
+              </Button>
+            </div>
           )}
 
           <DropdownMenu
@@ -404,7 +463,7 @@ export const ThemeEditor: React.FC = () => {
 
       {saveError && (
         <Callout className="shrink-0 rounded-none border-b border-error/20 bg-error/10 text-error font-body-sm">
-          Save failed: {saveError}
+          {saveError}
         </Callout>
       )}
 

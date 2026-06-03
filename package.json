@@ -38,6 +38,7 @@
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-tabs": "^1.0.4",
     "@storybook/addon-essentials": "^8.1.0",
