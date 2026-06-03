@@ -22,7 +22,8 @@
     "build-tokens": "./build-tokens.sh",
     "generate-css-vars": "node scripts/generate-css-vars.js",
     "storybook": "storybook dev -p 6006",
-    "theme-editor": "vite --config theme-editor/vite.config.ts --port 5174"
+    "theme-editor": "vite --config theme-editor/vite.config.ts --port 5174",
+    "export-bundle": "node scripts/export-bundle.mjs"
   },
   "peerDependencies": {
     "@radix-ui/react-checkbox": ">=1.0.0",

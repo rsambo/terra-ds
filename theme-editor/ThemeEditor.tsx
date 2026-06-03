@@ -113,6 +113,7 @@ export const ThemeEditor: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showLifeline, setShowLifeline] = useState(false);
+  const importRef = React.useRef<HTMLInputElement>(null);
 
   // Apply overrides whenever state or theme changes
   useEffect(() => {
@@ -252,6 +253,94 @@ export const ThemeEditor: React.FC = () => {
   if (editedCounts.radius) badges.push(`● ${editedCounts.radius} radius`);
   if (editedCounts.typography) badges.push(`● ${editedCounts.typography} typography`);
 
+  const handleExport = useCallback(() => {
+    const root = getComputedStyle(document.documentElement);
+    const get = (prefix: string, name: string) => root.getPropertyValue(`--${prefix}-${name}`).trim();
+
+    const themeJson = {
+      name: 'Terra DS Theme',
+      version: '1.0.0',
+      colors: {
+        light: Object.fromEntries(ALL_COLOR_TOKENS.map((n) => [n, get('color', n)])),
+        dark: Object.fromEntries(ALL_COLOR_TOKENS.map((n) => [n, get('color', n)])),
+      },
+      spacing: Object.fromEntries(ALL_SPACING_TOKENS.map((n) => [n, get('spacing', n)])),
+      rounded: Object.fromEntries(ALL_RADIUS_TOKENS.map((n) => [n, get('rounded', n)])),
+      typography: Object.fromEntries(ALL_TYPOGRAPHY_ROLES.map((role) => [
+        role,
+        {
+          fontFamily: get('font-family', role),
+          fontSize: get('font-size', role),
+          fontWeight: get('font-weight', role),
+          lineHeight: get('line-height', role),
+          letterSpacing: get('letter-spacing', role),
+        },
+      ])),
+    };
+
+    const blob = new Blob([JSON.stringify(themeJson, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'theme.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        const newState: EditorState = {
+          colors: { light: {}, dark: {} },
+          spacing: {},
+          radius: {},
+          typography: {},
+        };
+
+        if (data.colors?.light) {
+          for (const [k, v] of Object.entries(data.colors.light)) {
+            if (ALL_COLOR_TOKENS.includes(k) && typeof v === 'string') newState.colors.light[k] = v;
+          }
+        }
+        if (data.colors?.dark) {
+          for (const [k, v] of Object.entries(data.colors.dark)) {
+            if (ALL_COLOR_TOKENS.includes(k) && typeof v === 'string') newState.colors.dark[k] = v;
+          }
+        }
+        if (data.spacing) {
+          for (const [k, v] of Object.entries(data.spacing)) {
+            if (ALL_SPACING_TOKENS.includes(k) && typeof v === 'string') newState.spacing[k] = v;
+          }
+        }
+        if (data.rounded) {
+          for (const [k, v] of Object.entries(data.rounded)) {
+            if (ALL_RADIUS_TOKENS.includes(k) && typeof v === 'string') newState.radius[k] = v;
+          }
+        }
+        if (data.typography) {
+          for (const [role, props] of Object.entries(data.typography)) {
+            if (ALL_TYPOGRAPHY_ROLES.includes(role) && props && typeof props === 'object') {
+              newState.typography[role] = {};
+              for (const [prop, val] of Object.entries(props as Record<string, unknown>)) {
+                if (typeof val === 'string') newState.typography[role][prop] = val;
+              }
+            }
+          }
+        }
+
+        setState(newState);
+      } catch {
+        setSaveError('Failed to parse theme.json');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }, []);
+
   return (
     <div className="h-screen flex flex-col bg-surface text-on-surface font-body-md overflow-hidden">
       {/* Toolbar */}
@@ -291,6 +380,26 @@ export const ThemeEditor: React.FC = () => {
           {badges.length > 0 && (
             <span className="font-label-sm text-accent">{badges.join(' · ')}</span>
           )}
+
+          <button
+            onClick={handleExport}
+            className="font-label-sm bg-surface text-on-surface border border-border rounded-md px-md py-sm hover:bg-surface-raised transition-colors"
+          >
+            Export
+          </button>
+          <button
+            onClick={() => importRef.current?.click()}
+            className="font-label-sm bg-surface text-on-surface border border-border rounded-md px-md py-sm hover:bg-surface-raised transition-colors"
+          >
+            Import
+          </button>
+          <input
+            ref={importRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={handleImport}
+          />
 
           <button
             onClick={handleSave}
